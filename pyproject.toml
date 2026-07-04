@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "galerymanager"
+version = "0.1.0"
+description = "Organizador de fotos e vídeos em pastas por tipo e data (Linux/macOS)."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "mpgxc" }]
+keywords = ["fotos", "videos", "galeria", "exif", "organizador", "midia"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS :: MacOS X",
+    "Topic :: Multimedia :: Graphics",
+    "Topic :: Utilities",
+]
+# Sem dependências obrigatórias: usa apenas a biblioteca padrão.
+dependencies = []
+
+[project.scripts]
+galerymanager = "galerymanager.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/mpgxc/galerymanager"
+
+[tool.setuptools.packages.find]
+include = ["galerymanager*"]
