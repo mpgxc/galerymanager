@@ -1,0 +1,73 @@
+name: Release
+
+# Dispara ao publicar uma tag de versão, ex.: v0.1.0
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    name: Build do pacote
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configura Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Roda os testes
+        run: python -m unittest discover -s tests -v
+
+      - name: Gera wheel e sdist
+        run: |
+          python -m pip install --upgrade build
+          python -m build
+
+      - name: Publica os artefatos como saída do job
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  pypi-publish:
+    name: Publica no PyPI
+    needs: build
+    runs-on: ubuntu-latest
+    # O ambiente 'pypi' permite exigir aprovação e casa com a configuração
+    # de "trusted publisher" no PyPI. Nenhum token é necessário.
+    environment:
+      name: pypi
+      url: https://pypi.org/project/galerymanager/
+    permissions:
+      id-token: write # necessário para o trusted publishing (OIDC)
+    steps:
+      - name: Baixa os artefatos
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Publica no PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+
+  github-release:
+    name: Cria o GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # necessário para criar o release e anexar os arquivos
+    steps:
+      - name: Baixa os artefatos
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Cria o Release com os artefatos
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          generate_release_notes: true

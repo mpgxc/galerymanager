@@ -31,13 +31,39 @@ A coluna `[origem]` na saída indica qual fonte foi usada em cada arquivo.
 
 ## Instalação
 
+### Via PyPI (recomendado)
+
+Com [pipx](https://pipx.pypa.io) (isola o CLI em seu próprio ambiente):
+
+```bash
+pipx install galerymanager
+```
+
+Ou com `pip`:
+
+```bash
+pip install galerymanager
+```
+
+### Direto de um release do GitHub
+
+```bash
+pip install "git+https://github.com/mpgxc/galerymanager.git@v0.1.0"
+```
+
+Você também pode baixar o arquivo `.whl` da página de
+[Releases](https://github.com/mpgxc/galerymanager/releases) e instalar com
+`pip install galerymanager-<versão>-py3-none-any.whl`.
+
+### A partir do código-fonte
+
 Não é obrigatório instalar — dá para rodar direto do diretório do projeto:
 
 ```bash
 python3 -m galerymanager --help
 ```
 
-Para instalar o comando `galerymanager` no sistema:
+Para instalar localmente o comando `galerymanager`:
 
 ```bash
 pip install .
@@ -124,6 +150,38 @@ for move in report.moves:
 ```bash
 python3 -m unittest discover -s tests -v
 ```
+
+Os testes rodam automaticamente em cada push/PR (Linux e macOS) via GitHub
+Actions — veja `.github/workflows/ci.yml`.
+
+## Publicando uma nova versão (mantenedor)
+
+O projeto publica no **PyPI** e cria um **GitHub Release** automaticamente ao
+receber uma tag `v*` (workflow `.github/workflows/release.yml`).
+
+**Configuração única — trusted publishing no PyPI** (sem tokens/senhas):
+
+1. Crie uma conta em <https://pypi.org> e faça login.
+2. Acesse <https://pypi.org/manage/account/publishing/> e adicione um
+   *pending publisher* com:
+   - **PyPI Project Name:** `galerymanager`
+   - **Owner:** `mpgxc`
+   - **Repository name:** `galerymanager`
+   - **Workflow name:** `release.yml`
+   - **Environment name:** `pypi`
+
+**A cada versão:**
+
+```bash
+# 1. Atualize a versão em pyproject.toml (ex.: 0.1.0 -> 0.2.0)
+# 2. Faça o commit e crie a tag correspondente
+git commit -am "chore: versão 0.2.0"
+git tag v0.2.0
+git push origin main --tags
+```
+
+O workflow builda o pacote, roda os testes, publica no PyPI e cria o Release
+com os arquivos `.whl` e `.tar.gz` anexados.
 
 ## Licença
 
