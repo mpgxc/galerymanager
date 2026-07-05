@@ -89,15 +89,19 @@ def _same_content(a: Path, b: Path) -> bool:
         return False
 
 
-def _unique_dest(dest: Path) -> Path:
-    """Gera um destino não existente adicionando sufixo _1, _2, ..."""
-    if not dest.exists():
+def _unique_dest(dest: Path, reserved: "set[Path] | frozenset[Path]" = frozenset()) -> Path:
+    """Gera um destino livre adicionando sufixo _1, _2, ...
+
+    Considera livre um caminho que não existe em disco *e* não foi reservado
+    por uma movimentação já planejada nesta execução (``reserved``).
+    """
+    if not dest.exists() and dest not in reserved:
         return dest
     stem, suffix, parent = dest.stem, dest.suffix, dest.parent
     i = 1
     while True:
         candidate = parent / f"{stem}_{i}{suffix}"
-        if not candidate.exists():
+        if not candidate.exists() and candidate not in reserved:
             return candidate
         i += 1
 
@@ -187,10 +191,9 @@ class Organizer:
         if self.duplicate_policy == DuplicatePolicy.OVERWRITE:
             return PlannedMove(source=source, dest=dest, dated=dated)
 
-        # RENAME (padrão): acha um nome livre, considerando também o plano atual.
-        candidate = _unique_dest(dest)
-        while candidate in seen_dests:
-            candidate = _unique_dest(candidate)
+        # RENAME (padrão): acha um nome livre, considerando também os destinos
+        # já reservados por outras movimentações desta mesma execução.
+        candidate = _unique_dest(dest, seen_dests)
         return PlannedMove(source=source, dest=candidate, dated=dated)
 
     def execute(
